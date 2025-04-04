@@ -1,97 +1,118 @@
-body {
-    font-family: 'Arial', sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f5f5f5;
-    margin: 0;
-    padding: 20px;
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const newTaskInput = document.getElementById('newTaskInput');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const pendingTasksList = document.getElementById('pendingTasksList');
+    const completedTasksList = document.getElementById('completedTasksList');
+    const completeSelectedBtn = document.getElementById('completeSelectedBtn');
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
+    // Завантаження завдань з локального сховища
+    loadTasks();
 
-h1, h2 {
-    color: #2c3e50;
-}
+    // Додавання нового завдання
+    addTaskBtn.addEventListener('click', addTask);
+    newTaskInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            addTask();
+        }
+    });
 
-.input-section {
-    margin-bottom: 30px;
-    padding: 15px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
-}
+    // Виконання вибраних завдань
+    completeSelectedBtn.addEventListener('click', completeSelectedTasks);
 
-input[type="text"] {
-    width: 70%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-}
+    function addTask() {
+        const taskText = newTaskInput.value.trim();
+        if (taskText === '') return;
 
-button {
-    padding: 10px 15px;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-left: 10px;
-}
+        const task = {
+            id: Date.now(),
+            text: taskText,
+            completed: false
+        };
 
-button:hover {
-    background-color: #2980b9;
-}
+        saveTask(task);
+        renderTask(task);
+        newTaskInput.value = '';
+    }
 
-.tasks-section {
-    margin-bottom: 30px;
-}
+    function saveTask(task) {
+        let tasks = getTasks();
+        tasks.push(task);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
 
-ul {
-    list-style-type: none;
-    padding: 0;
-}
+    function getTasks() {
+        return JSON.parse(localStorage.getItem('tasks')) || [];
+    }
 
-li {
-    padding: 10px;
-    margin-bottom: 5px;
-    background-color: #f9f9f9;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-}
+    function loadTasks() {
+        const tasks = getTasks();
+        tasks.forEach(task => renderTask(task));
+    }
 
-li:hover {
-    background-color: #eee;
-}
+    function renderTask(task) {
+        const li = document.createElement('li');
+        li.dataset.id = task.id;
 
-input[type="checkbox"] {
-    margin-right: 10px;
-}
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.completed;
+        checkbox.addEventListener('change', toggleTaskStatus);
 
-.complete-btn {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 8px 15px;
-    background-color: #2ecc71;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 14px;
-}
+        const taskText = document.createElement('span');
+        taskText.textContent = task.text;
+        if (task.completed) {
+            taskText.classList.add('completed-task');
+        }
 
-.complete-btn:hover {
-    background-color: #27ae60;
-}
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Видалити';
+        deleteBtn.classList.add('delete-btn');
+        deleteBtn.addEventListener('click', deleteTask);
 
-.completed-task {
-    text-decoration: line-through;
-    color: #888;
-}
+        li.appendChild(checkbox);
+        li.appendChild(taskText);
+        li.appendChild(deleteBtn);
+
+        if (task.completed) {
+            completedTasksList.appendChild(li);
+        } else {
+            pendingTasksList.appendChild(li);
+        }
+    }
+
+    function toggleTaskStatus(e) {
+        const taskId = parseInt(e.target.parentElement.dataset.id);
+        let tasks = getTasks();
+        const taskIndex = tasks.findIndex(task => task.id === taskId);
+        
+        if (taskIndex !== -1) {
+            tasks[taskIndex].completed = e.target.checked;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            // Переміщення завдання між списками
+            if (e.target.checked) {
+                completedTasksList.appendChild(e.target.parentElement);
+                e.target.nextElementSibling.classList.add('completed-task');
+            } else {
+                pendingTasksList.appendChild(e.target.parentElement);
+                e.target.nextElementSibling.classList.remove('completed-task');
+            }
+        }
+    }
+
+    function completeSelectedTasks() {
+        const checkboxes = pendingTasksList.querySelectorAll('input[type="checkbox"]:checked');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change'));
+        });
+    }
+
+    function deleteTask(e) {
+        const taskId = parseInt(e.target.parentElement.dataset.id);
+        let tasks = getTasks();
+        tasks = tasks.filter(task => task.id !== taskId);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        e.target.parentElement.remove();
+    }
+});
