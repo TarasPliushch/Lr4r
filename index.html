@@ -1,40 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vue Todo App</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список завдань</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <h1>Todo List</h1>
-    <input 
-      v-model="newTodo" 
-      @keyup.enter="addTodo" 
-      placeholder="Add a new task"
-    >
-    <ul>
-      <li v-for="(todo, index) in todos" :key="index">
-        <span v-if="!todo.editing">{{ todo.text }}</span>
-        <input 
-          v-else 
-          v-model="todo.text" 
-          @keyup.enter="saveEdit(todo)" 
-          @blur="saveEdit(todo)"
-          ref="editInput"
-        >
-        <button @click="editTodo(todo)">Edit</button>
-        <button @click="removeTodo(index)">Delete</button>
-      </li>
-    </ul>
-    <p v-if="todos.length === 0">No tasks yet. Add one!</p>
-    <div v-else>
-      <p>Total tasks: {{ todos.length }}</p>
-      <p>Completed: {{ completedTodos }}</p>
+    <div class="container">
+        <h1>Список завдань</h1>
+        
+        <div class="input-section">
+            <input type="text" id="newTaskInput" placeholder="Введіть нове завдання">
+            <button id="addTaskBtn">Додати завдання</button>
+        </div>
+        
+        <div class="tasks-section">
+            <h2>Додані завдання</h2>
+            <ul id="pendingTasksList">
+                <!-- Тут будуть відображатися невиконані завдання -->
+            </ul>
+            <a href="#" id="completeSelectedBtn" class="complete-btn">Виконати вибрані завдання</a>
+        </div>
+        
+        <div class="tasks-section">
+            <h2>Виконані завдання</h2>
+            <ul id="completedTasksList">
+                <!-- Тут будуть відображатися виконані завдання -->
+            </ul>
+        </div>
     </div>
-  </div>
-  <script src="app.js"></script>
+
+    <script src="script.js"></script>
 </body>
 </html>
