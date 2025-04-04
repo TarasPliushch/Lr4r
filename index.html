@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue Todo App</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1>Todo List</h1>
+    <input 
+      v-model="newTodo" 
+      @keyup.enter="addTodo" 
+      placeholder="Add a new task"
+    >
+    <ul>
+      <li v-for="(todo, index) in todos" :key="index">
+        <span v-if="!todo.editing">{{ todo.text }}</span>
+        <input 
+          v-else 
+          v-model="todo.text" 
+          @keyup.enter="saveEdit(todo)" 
+          @blur="saveEdit(todo)"
+          ref="editInput"
+        >
+        <button @click="editTodo(todo)">Edit</button>
+        <button @click="removeTodo(index)">Delete</button>
+      </li>
+    </ul>
+    <p v-if="todos.length === 0">No tasks yet. Add one!</p>
+    <div v-else>
+      <p>Total tasks: {{ todos.length }}</p>
+      <p>Completed: {{ completedTodos }}</p>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
